@@ -63,3 +63,6 @@ library artwork; it is not needed for a functioning shortcut.
 
 When VDFLib is used through `add_subdirectory`, include headers directly from
 the source directory (for example, `#include "vdflib.h"`).
+
+## Credits
+- [Steam-Shelf](https://github.com/The-Sofishticated-Man/steam-shelf): Biggest knowledgebase on how the shortcut system works
