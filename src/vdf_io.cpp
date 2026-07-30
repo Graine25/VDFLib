@@ -11,6 +11,7 @@
 #include <cstdint>
 #include <cstring>
 #include <fstream>
+#include <system_error>
 #include <vector>
 
 namespace vdflib {
@@ -170,20 +171,62 @@ VdfValue parseVdf(const std::filesystem::path& filePath) {
     return VdfValue(parseSection(reader));
 }
 
-void writeVdf(const VdfValue& value, const std::filesystem::path& filePath) {
+void writeVdf(const VdfValue& value, const std::filesystem::path& filePath,
+              bool createBackup) {
     if (filePath.has_parent_path()) {
         std::filesystem::create_directories(filePath.parent_path());
     }
 
-    std::ofstream out(filePath, std::ios::binary | std::ios::trunc);
-    if (!out) {
-        throw VdfIoError("Could not open VDF file for writing: " + filePath.string());
+    std::filesystem::path temporary = filePath;
+    temporary += ".tmp";
+    std::filesystem::path backup = filePath;
+    backup += ".bak";
+
+    {
+        std::ofstream out(temporary, std::ios::binary | std::ios::trunc);
+        if (!out) {
+            throw VdfIoError("Could not open temporary VDF file for writing: " +
+                             temporary.string());
+        }
+
+        for (const auto& [key, childValue] : value.asObject()) {
+            encodeValue(out, key, childValue);
+        }
+        out.put(static_cast<char>(kTypeEnd));
+        out.flush();
+        if (!out) {
+            out.close();
+            std::filesystem::remove(temporary);
+            throw VdfIoError("Could not finish writing VDF file: " + temporary.string());
+        }
     }
 
-    for (const auto& [key, childValue] : value.asObject()) {
-        encodeValue(out, key, childValue);
+    std::error_code error;
+    const bool hadOriginal = std::filesystem::exists(filePath);
+    if (hadOriginal) {
+        std::filesystem::remove(backup, error);
+        error.clear();
+        std::filesystem::rename(filePath, backup, error);
+        if (error) {
+            std::filesystem::remove(temporary);
+            throw VdfIoError("Could not prepare VDF file for replacement: " +
+                             error.message());
+        }
     }
-    out.put(static_cast<char>(kTypeEnd));
+
+    std::filesystem::rename(temporary, filePath, error);
+    if (error) {
+        if (hadOriginal) {
+            std::error_code restoreError;
+            std::filesystem::rename(backup, filePath, restoreError);
+        }
+        std::filesystem::remove(temporary);
+        throw VdfIoError("Could not replace VDF file: " + error.message());
+    }
+
+    if (hadOriginal && !createBackup) {
+        std::filesystem::remove(backup, error);
+    }
 }
 
 }

@@ -23,7 +23,7 @@ public:
 
     void load();
 
-    void save() const;
+    void save(bool createBackup = true) const;
 
     const std::vector<Shortcut>& shortcuts() const { return shortcuts_; }
 

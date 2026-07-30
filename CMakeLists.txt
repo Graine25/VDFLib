@@ -2,12 +2,12 @@
 cmake_minimum_required(VERSION 3.16)
 project(VDFLib VERSION 0.1.0 LANGUAGES CXX)
 
+include(GNUInstallDirs)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-option(VDFLIB_BUILD_TESTS "Build VDFLib's test suite" ${PROJECT_IS_TOP_LEVEL})
-option(VDFLIB_BUILD_EXAMPLES "Build VDFLib's example programs" ${PROJECT_IS_TOP_LEVEL})
 option(BUILD_SHARED_LIBS "Build VDFLib as a shared library" OFF)
 
 add_library(vdflib
@@ -20,6 +20,16 @@ add_library(vdflib
     src/artwork.cpp
 )
 add_library(vdflib::vdflib ALIAS vdflib)
+
+add_library(vdflib_c outsource/cpp/vdflib_c.cpp)
+add_library(vdflib::c ALIAS vdflib_c)
+target_link_libraries(vdflib_c PRIVATE vdflib)
+set_target_properties(vdflib vdflib_c PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+target_include_directories(vdflib_c
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/outsource/cpp>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
 
 target_include_directories(vdflib
     PUBLIC
@@ -37,22 +47,13 @@ else()
     target_compile_options(vdflib PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
-if(VDFLIB_BUILD_TESTS)
-    enable_testing()
-    add_subdirectory(tests)
-endif()
-
-if(VDFLIB_BUILD_EXAMPLES)
-    add_subdirectory(example)
-endif()
-
-include(GNUInstallDirs)
-install(TARGETS vdflib
+install(TARGETS vdflib vdflib_c
     EXPORT vdflibTargets
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+install(FILES outsource/cpp/vdflib_c.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(FILES
     src/artwork.h
     src/shortcut.h

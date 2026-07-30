@@ -42,7 +42,7 @@ void ShortcutRepository::load() {
     }
 }
 
-void ShortcutRepository::save() const {
+void ShortcutRepository::save(bool createBackup) const {
     VdfObject shortcutsSection;
     for (size_t i = 0; i < shortcuts_.size(); ++i) {
         shortcutsSection[std::to_string(i)] = shortcuts_[i].toVdf();
@@ -51,7 +51,7 @@ void ShortcutRepository::save() const {
     VdfObject root;
     root["shortcuts"] = VdfValue(shortcutsSection);
 
-    writeVdf(VdfValue(root), path_);
+    writeVdf(VdfValue(root), path_, createBackup);
 }
 
 void ShortcutRepository::addShortcut(Shortcut shortcut) { shortcuts_.push_back(std::move(shortcut)); }

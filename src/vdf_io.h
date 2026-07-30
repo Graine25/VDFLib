@@ -24,6 +24,10 @@ public:
 
 VdfValue parseVdf(const std::filesystem::path& filePath);
 
-void writeVdf(const VdfValue& value, const std::filesystem::path& filePath);
+// Writes through a temporary file and atomically replaces the destination.
+// When createBackup is true, an existing destination is preserved as
+// "<filename>.bak".
+void writeVdf(const VdfValue& value, const std::filesystem::path& filePath,
+              bool createBackup = false);
 
 }
