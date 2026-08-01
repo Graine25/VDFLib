@@ -12,6 +12,14 @@
 
 namespace vdflib {
 
+VdfObject::iterator VdfObject::begin() { return entries_.begin(); }
+VdfObject::iterator VdfObject::end() { return entries_.end(); }
+VdfObject::const_iterator VdfObject::begin() const { return entries_.begin(); }
+VdfObject::const_iterator VdfObject::end() const { return entries_.end(); }
+
+size_t VdfObject::size() const { return entries_.size(); }
+bool VdfObject::empty() const { return entries_.empty(); }
+
 VdfValue& VdfObject::operator[](const std::string& key) {
     if (VdfValue* existing = find(key)) {
         return *existing;

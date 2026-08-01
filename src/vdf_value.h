@@ -38,13 +38,13 @@ public:
     bool contains(const std::string& key) const { return find(key) != nullptr; }
     bool erase(const std::string& key);
 
-    iterator begin() { return entries_.begin(); }
-    iterator end() { return entries_.end(); }
-    const_iterator begin() const { return entries_.begin(); }
-    const_iterator end() const { return entries_.end(); }
+    iterator begin();
+    iterator end();
+    const_iterator begin() const;
+    const_iterator end() const;
 
-    size_t size() const { return entries_.size(); }
-    bool empty() const { return entries_.empty(); }
+    size_t size() const;
+    bool empty() const;
 
     bool operator==(const VdfObject& other) const;
     bool operator!=(const VdfObject& other) const { return !(*this == other); }
