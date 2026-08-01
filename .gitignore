@@ -24,5 +24,8 @@
 *.out
 *.app
 out/
+build/
+target/
+__pycache__/
+*.egg-info/
 .DS_Store
-/tests

@@ -1,0 +1,11 @@
+[package]
+name = "vdflib"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Safe Rust bindings for VDFLib"
+links = "vdflib_c"
+build = "outsource/rust/build.rs"
+
+[lib]
+path = "outsource/rust/src/lib.rs"
